@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Tyre Management
- * Plugin URI:        https://github.com/uzzziellite/tyres
+ * Plugin URI:        https://github.com/uzziellite/silverstone-tyres
  * Description:       Fetch the data for the tyres of different car models based on their modifications and years
  * Version:           1.1.0
  * Requires at least: 5.2
