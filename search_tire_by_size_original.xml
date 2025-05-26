@@ -1,0 +1,21 @@
+[section bg_color="rgb(255,255,255)"]
+
+[row col_bg="rgb(255,255,255)" col_bg_radius="27" width="custom" custom_width="950px" v_align="equal" h_align="center" padding="10px 10px 10px 10px" padding__sm="10px 10px 10px 30px"]
+
+[col span="9" span__sm="11" margin__sm="0px 0px 0px 0px" align="center" depth="3"]
+
+[title style="center" text="Search Tire By Size" tag_name="h4" color="rgb(251, 164, 31)" size="102"]
+
+[ux_text text_align__sm="center"]
+
+<p>[woof tax_only='pa_sub-category,pa_sectional-width,pa_aspect-ratio,pa_rim-dimeter' autosubmit=1 ajax_redraw=1 is_ajax=1]</p>
+<h3><strong>Unsure where to find your tyre size?</strong></h3>
+<p>[button text="Click Here for more information" link="#more"]&nbsp;</p>
+<p>[lightbox id="more" width="600px" padding="20px"][block id="tire-size-info"][/lightbox]</p>
+[/ux_text]
+
+[/col]
+
+[/row]
+
+[/section]

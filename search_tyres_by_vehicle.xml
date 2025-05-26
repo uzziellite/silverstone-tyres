@@ -1,0 +1,19 @@
+[section bg_color="rgb(255,255,255)"]
+
+[row col_bg="rgb(255,255,255)" col_bg_radius="27" width="custom" custom_width="950px" v_align="equal" h_align="center" padding="10px 10px 10px 10px" padding__sm="10px 10px 10px 30px"]
+
+[col span="9" span__sm="11" margin__sm="0px 0px 0px 0px" align="center" depth="3"]
+
+[title style="center" text="Search Tyre By Vehicle Brand" tag_name="h4" color="rgb(251, 164, 31)" size="102"]
+
+[ux_text text_align__sm="center"]
+
+[silverstone_vehicles_brand]
+
+[/ux_text]
+
+[/col]
+
+[/row]
+
+[/section]

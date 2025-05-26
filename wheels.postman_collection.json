@@ -1,0 +1,135 @@
+{
+	"info": {
+		"_postman_id": "d0239e10-417f-47ec-8f2f-2d4bb950cb39",
+		"name": "wheels",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24198318",
+		"_collection_link": "https://team-emmerce.postman.co/workspace/wheels~076cf46d-adf2-4b21-9d47-9ea80222a9d0/collection/24198318-d0239e10-417f-47ec-8f2f-2d4bb950cb39?action=share&source=collection_link&creator=24198318"
+	},
+	"item": [
+		{
+			"name": "List of brands",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "172.105.37.163:5593/api/v1/wheels/brands",
+					"host": [
+						"172",
+						"105",
+						"37",
+						"163"
+					],
+					"port": "5593",
+					"path": [
+						"api",
+						"v1",
+						"wheels",
+						"brands"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of models",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "172.105.37.163:5593/api/v1/wheels/models/{{brand_id}}",
+					"host": [
+						"172",
+						"105",
+						"37",
+						"163"
+					],
+					"port": "5593",
+					"path": [
+						"api",
+						"v1",
+						"wheels",
+						"models",
+						"{{brand_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "year of manufacture ",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "172.105.37.163:5593/api/v1/wheels/years/{{model_id}}",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "",
+					"path": [
+						"api",
+						"v1",
+						"wheels",
+						"years",
+						"{{model_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modifications",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "172.105.37.163:5593/api/v1/wheels/modifications/{{year_of_manufacture_id}}",
+					"host": [
+						"172",
+						"105",
+						"37",
+						"163"
+					],
+					"port": "5593",
+					"path": [
+						"api",
+						"v1",
+						"wheels",
+						"modifications",
+						"{{year_of_manufacture_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tires ",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "172.105.37.163:5593/api/v1/wheels/tyres/{{modification_id}}",
+					"host": [
+						"172",
+						"105",
+						"37",
+						"163"
+					],
+					"port": "5593",
+					"path": [
+						"api",
+						"v1",
+						"wheels",
+						"tyres",
+						"{{modification_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
