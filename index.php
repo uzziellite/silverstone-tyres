@@ -373,10 +373,12 @@ function silverstone_select2_shortcode() {
 						tireDetails.append(`<br>Weight: ${tire.tire_weight_kg !== 'N/A' ? tire.tire_weight_kg + ' kg' : 'N/A'}`);
 						tireDetails.append(`<br>Diameter: ${tire.tire_diameter_mm !== 'N/A' ? tire.tire_diameter_mm + ' mm' : 'N/A'}`);
 						tireDetails.append(`<br>Bolt Pattern: ${tire.bolt_pattern}`);
-						tireDetails.append(`<br>Fasteners: ${tire.wheel_fasteners_type}`);
+						tireDetails.append(`<br>Rim: ${tire.rim !== 'N/A' ? tire.rim : 'N/A'}`);
+						tireDetails.append(`<br>Fasteners: ${tire.wheel_fasteners_type} (${tire.wheel_fasteners_thread_size !== 'N/A' ? tire.wheel_fasteners_thread_size : 'N/A'})`);
 						if (tire.tire_pressure !== 'N/A') {
 							tireDetails.append(`<br>Pressure: ${tire.tire_pressure && tire.tire_pressure.bar ? `${tire.tire_pressure.bar} bar / ${tire.tire_pressure.kPa} kPa / ${tire.tire_pressure.psi} psi` : 'N/A'}`);
 						}
+						tireDetails.append(`<br>Tightening Torque: ${tire.wheel_tightening_torque !== 'N/A' ? tire.wheel_tightening_torque : 'N/A'}`);
 						const link = $('<a></a>')
 							.attr('href', generateWoocommerceSearchString(tire.tire_full))
 							.append(tireDetails);
@@ -526,8 +528,11 @@ function get_vehicle_tyres_callback() {
                                 'tire_weight_kg' => $front['tire_weight_kg'] ?? 'N/A',
                                 'tire_diameter_mm' => $front['tire_diameter_mm'] ?? 'N/A',
                                 'bolt_pattern' => $technical['bolt_pattern'] ?? 'N/A',
-                                'wheel_fasteners_type' => $technical['wheel_fasteners']['type'] ?? 'N/A',
-                                'tire_pressure' => $front['tire_pressure'] ?? 'N/A'
+								'wheel_fasteners_type' => $technical['wheel_fasteners']['type'] ?? 'N/A',
+                                'wheel_fasteners_thread_size' => $technical['wheel_fasteners']['thread_size'] ?? 'N/A',
+                                'tire_pressure' => $front['tire_pressure'] ?? 'N/A',
+								'rim' => $front['rim'] ?? 'N/A',
+								'wheel_tightening_torque' => $technical['wheel_tightening_torque'] ?? 'N/A'
                             ];
                         }
                     }
