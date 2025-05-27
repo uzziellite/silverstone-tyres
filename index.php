@@ -431,7 +431,7 @@ function silverstone_select2_shortcode() {
 		        fetchBrand();
 		    });
 
-		    $('#ssmodel').focus(() => {
+		    $('#ssmodel').change(() => {
 		        fetchModel();
 		    });
 
