@@ -273,6 +273,7 @@ function silverstone_select2_shortcode() {
 		jQuery(document).ready(($) => {
 			const fetchBrand = () => {
 				const brand = $('#ssbrand').val();
+				localStorage.setItem('selectedBrand', brand);
 		        $('#ssmodel').prop('disabled', true);
 		        $('#ssyear').prop('disabled', true);
 		        $('#ssmodifications').prop('disabled', true);
@@ -430,7 +431,7 @@ function silverstone_select2_shortcode() {
 		        fetchBrand();
 		    });
 
-		    $('#ssmodel').change(() => {
+		    $('#ssmodel').focus(() => {
 		        fetchModel();
 		    });
 
@@ -454,6 +455,11 @@ function silverstone_select2_shortcode() {
 		    $(document).ajaxStop(() => {
 		        $('#loader').hide();
 		    });
+
+			if( localStorage.getItem('selectedBrand') ){
+				localStorage.removeItem('selectedBrand');
+				window.location.reload();
+			}
 		});
 	</script>
     <?php
