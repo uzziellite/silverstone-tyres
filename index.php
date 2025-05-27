@@ -554,14 +554,6 @@ function get_vehicle_tyres_callback() {
                                     'post_type' => 'product',
                                     'post_status' => 'publish',
                                     'posts_per_page' => 1,
-                                    'meta_query' => [
-                                        'relation' => 'OR',
-                                        [
-                                            'key' => '_tire_size',
-                                            'value' => $core_tire_size,
-                                            'compare' => 'LIKE'
-                                        ]
-                                    ],
                                     's' => $core_tire_size
                                 ];
                                 $query = new WP_Query($args);
