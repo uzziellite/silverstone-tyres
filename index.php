@@ -379,6 +379,8 @@ function silverstone_select2_shortcode() {
 						tireDetails.append(`<br>Pressure: ${tire.tire_pressure && tire.tire_pressure.bar ? `${tire.tire_pressure.bar} bar / ${tire.tire_pressure.kPa} kPa / ${tire.tire_pressure.psi} psi` : 'N/A'}`);
 						if (!tire.product.available) {
 							tireDetails.append(`<br><em style="color: #e53e3e;">Currently not available in store</em>`);
+						}else{
+							tireDetails.append(`<br><em style="color: #18e73b;">Available in store</em>`);
 						}
 						if (tire.image !== 'N/A') {
 							const img = $('<img>').attr('src', tire.image).css({
