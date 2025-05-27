@@ -362,7 +362,7 @@ function silverstone_select2_shortcode() {
 					tireSizes.forEach(tire => {
 						const li = $('<li></li>').css({
 							display: 'flex',
-							alignItems: 'center',
+							alignItems: 'left',
 							justifyContent: 'space-between',
 							padding: '1rem'
 						});
@@ -370,17 +370,32 @@ function silverstone_select2_shortcode() {
 							flex: '1'
 						});
 						tireDetails.append(`<strong>${tire.tire_full}</strong>`);
+						tireDetails.append(`<br>Rim: ${tire.rim !== 'N/A' ? tire.rim : 'N/A'}`);
 						tireDetails.append(`<br>Weight: ${tire.tire_weight_kg !== 'N/A' ? tire.tire_weight_kg + ' kg' : 'N/A'}`);
 						tireDetails.append(`<br>Diameter: ${tire.tire_diameter_mm !== 'N/A' ? tire.tire_diameter_mm + ' mm' : 'N/A'}`);
 						tireDetails.append(`<br>Bolt Pattern: ${tire.bolt_pattern}`);
-						tireDetails.append(`<br>Rim: ${tire.rim !== 'N/A' ? tire.rim : 'N/A'}`);
 						tireDetails.append(`<br>Fasteners: ${tire.wheel_fasteners_type} (${tire.wheel_fasteners_thread_size !== 'N/A' ? tire.wheel_fasteners_thread_size : 'N/A'})`);
-						if (tire.tire_pressure !== 'N/A') {
-							tireDetails.append(`<br>Pressure: ${tire.tire_pressure && tire.tire_pressure.bar ? `${tire.tire_pressure.bar} bar / ${tire.tire_pressure.kPa} kPa / ${tire.tire_pressure.psi} psi` : 'N/A'}`);
-						}
 						tireDetails.append(`<br>Tightening Torque: ${tire.wheel_tightening_torque !== 'N/A' ? tire.wheel_tightening_torque : 'N/A'}`);
+						tireDetails.append(`<br>Pressure: ${tire.tire_pressure && tire.tire_pressure.bar ? `${tire.tire_pressure.bar} bar / ${tire.tire_pressure.kPa} kPa / ${tire.tire_pressure.psi} psi` : 'N/A'}`);
+						if (!tire.product.available) {
+							tireDetails.append(`<br><em style="color: #e53e3e;">Currently not available in store</em>`);
+						}
+						if (tire.image !== 'N/A') {
+							const img = $('<img>').attr('src', tire.image).css({
+								width: '200px',
+								height: 'auto',
+								marginRight: '1rem',
+								borderRadius: '0.25rem'
+							});
+							tireDetails.append(img);
+						}
 						const link = $('<a></a>')
-							.attr('href', generateWoocommerceSearchString(tire.tire_full))
+							.attr('href', tire.product.permalink)
+							.css({
+								pointerEvents: tire.product.available ? 'auto' : 'none',
+								color: tire.product.available ? '#000' : '#1f2937',
+								cursor: tire.product.available ? 'pointer' : 'default'
+							})
 							.append(tireDetails);
 						const svg = $('<svg height="24px" width="24px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve">' +
 							'<g>' +
@@ -523,16 +538,72 @@ function get_vehicle_tyres_callback() {
                         foreach ($data['wheels'] as $wheel) {
                             $front = $wheel['front'];
                             $technical = $data['technical'];
+                            $tire_size = $front['tire_full'] ?? 'N/A';
+							$image_url = $data['generation']['bodies'][0]['image'] ?? 'N/A';
+                            
+                            
+                            $core_tire_size = 'N/A';
+							if ($tire_size !== 'N/A' && preg_match('/^(\d+\/\d+R\d+)/', $tire_size, $matches)) {
+								$core_tire_size = $matches[1];
+							}
+                            
+                            
+                            $product_data = [];
+                            if ($core_tire_size !== 'N/A') {
+                                $args = [
+                                    'post_type' => 'product',
+                                    'post_status' => 'publish',
+                                    'posts_per_page' => 1,
+                                    'meta_query' => [
+                                        'relation' => 'OR',
+                                        [
+                                            'key' => '_tire_size',
+                                            'value' => $core_tire_size,
+                                            'compare' => 'LIKE'
+                                        ]
+                                    ],
+                                    's' => $core_tire_size
+                                ];
+                                $query = new WP_Query($args);
+                                
+                                if ($query->have_posts()) {
+                                    while ($query->have_posts()) {
+                                        $query->the_post();
+                                        $product_id = get_the_ID();
+                                        $product_data = [
+                                            'product_id' => $product_id,
+                                            'permalink' => get_permalink($product_id),
+                                            'available' => true
+                                        ];
+                                    }
+                                    wp_reset_postdata();
+                                } else {
+                                    $product_data = [
+                                        'product_id' => null,
+                                        'permalink' => '#',
+                                        'available' => false
+                                    ];
+                                }
+                            } else {
+                                $product_data = [
+                                    'product_id' => null,
+                                    'permalink' => '#',
+                                    'available' => false
+                                ];
+                            }
+                            
                             $detailed_tyres[] = [
-                                'tire_full' => $front['tire_full'] ?? 'N/A',
+                                'tire_full' => $tire_size,
                                 'tire_weight_kg' => $front['tire_weight_kg'] ?? 'N/A',
                                 'tire_diameter_mm' => $front['tire_diameter_mm'] ?? 'N/A',
                                 'bolt_pattern' => $technical['bolt_pattern'] ?? 'N/A',
-								'wheel_fasteners_type' => $technical['wheel_fasteners']['type'] ?? 'N/A',
+                                'wheel_fasteners_type' => $technical['wheel_fasteners']['type'] ?? 'N/A',
                                 'wheel_fasteners_thread_size' => $technical['wheel_fasteners']['thread_size'] ?? 'N/A',
                                 'tire_pressure' => $front['tire_pressure'] ?? 'N/A',
-								'rim' => $front['rim'] ?? 'N/A',
-								'wheel_tightening_torque' => $technical['wheel_tightening_torque'] ?? 'N/A'
+                                'rim' => $front['rim'] ?? 'N/A',
+                                'wheel_tightening_torque' => $technical['wheel_tightening_torque'] ?? 'N/A',
+                                'product' => $product_data,
+								'image' => $image_url
                             ];
                         }
                     }
