@@ -19,27 +19,63 @@
  * License:           GPL v2 or later
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 define('API_BASE', 'http://172.105.37.163:5593/api/v1/wheels');
 
-function fetchRemote($url) {
-	$response = wp_remote_get( $url );
 
-	if ( is_wp_error( $response ) ) {
-	    $error_message = $response->get_error_message();
-	    echo "Tyres API Error: $error_message\n";
-	} else {
-	    $body = wp_remote_retrieve_body( $response );
-	    $data = json_decode( $body )->data;
-	    return $data;
-	}
+/**
+ * Fetch data from a remote API
+ * 
+ * @param string $url The API endpoint URL
+ * @return mixed The decoded JSON data or null on failure
+ */
+function fetchRemote($url) {
+    $max_retries = 3;
+    $retry_delay = 2; // seconds
+    $attempt = 0;
+
+    while ($attempt < $max_retries) {
+        $response = wp_remote_get($url, array(
+            'timeout' => 60,
+            'headers' => array(
+                'Accept' => 'application/json'
+            )
+        ));
+
+        if (!is_wp_error($response)) {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body);
+            
+            if (json_last_error() === JSON_ERROR_NONE && isset($data->data)) {
+                return $data->data;
+            } else {
+                error_log("Tyres API JSON Error: Invalid JSON response from $url");
+            }
+        } else {
+            $error_message = $response->get_error_message();
+            error_log("Tyres API Error (Attempt " . ($attempt + 1) . "): $error_message for URL: $url");
+        }
+
+        $attempt++;
+        if ($attempt < $max_retries) {
+            sleep($retry_delay);
+        }
+    }
+
+    echo "Tyres API Error: Failed to fetch data from $url after $max_retries attempts\n";
+
+    return null;
 }
 
 /**
  * Get all the vehicles
  * 
- * @return array
+ * @return array|null
  */
-function getVehicles() :array {
+function getVehicles() :array|null {
 	$url = API_BASE . '/brands';
 	$vehicles = fetchRemote($url);
 	$store = [];
@@ -50,17 +86,15 @@ function getVehicles() :array {
 
 		return $store;
 	}
-
-	return [["Network Error!",1,"none"]];
 }
 
 /**
  * Get the vehicles model
  *  
  * @param string $id The id of the brand returned from the list of vehicles
- * @return array
+ * @return array|null
  */
-function getModel($id) :array {
+function getModel($id) :array|null {
 	$url = API_BASE . "/models/". $id;
 	$models = fetchRemote($url);
 	$store = [];
@@ -71,17 +105,15 @@ function getModel($id) :array {
 
 		return $store;
 	}
-
-	return [["Network Error!",1,"none"]];
 }
 
 /**
  * Get the vehicles Years of manufacturing
  * 
  * @param string $id The ID of the model
- * @return array
+ * @return array|null
  */
-function getYears($id): array {
+function getYears($id): array|null {
 	$url = API_BASE . "/years/" . $id;
 	$years = fetchRemote($url);
     $store = [];
@@ -92,8 +124,6 @@ function getYears($id): array {
 
     	return $store;
     }
-
-    return [["Network Error!",1,"none"]];
 }
 
 
@@ -101,9 +131,9 @@ function getYears($id): array {
  * Get the vehicles modifications
  * 
  * @param string $id The ID of the year
- * @return array
+ * @return array|null
  */
-function getModifications($id) :array {
+function getModifications($id) :array|null {
 	$url = API_BASE . "/modifications/" . $id;
 	$modifications = fetchRemote($url);
 	$store = [];
@@ -113,16 +143,15 @@ function getModifications($id) :array {
 		}
 		return $store;
 	}
-	return [["Network Error!",1,"none"]];
 }
 
 /**
  * Get the vehicle tyres
  * 
  * @param string $id the id of the modification 
- * @return array
+ * @return array|null
  */
-function getAvailableTyres($id) :array {
+function getAvailableTyres($id) :array|null {
 	$url = API_BASE . "/tyres/" . $id;
 	$tyres = fetchRemote($url);
 	$store = [];
@@ -132,9 +161,12 @@ function getAvailableTyres($id) :array {
 		}
 		return $store;
 	}
-	return [["Network Error!",1,"none"]];
 }
 
+/**
+ * Enqueue Select2 jQuery and CSS
+ * @return void
+ */
 function silverstone_enqueue_select2_jquery() {
     wp_enqueue_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
     
@@ -161,6 +193,8 @@ add_action('wp_enqueue_scripts', 'silverstone_enqueue_select2_jquery');
 
 /**
  * Tyre Management Shortcode
+ * This shortcode will display the vehicle selection form and results
+ * @return string
  */
 function silverstone_select2_shortcode() {
     $vehicles = getVehicles();
@@ -467,6 +501,10 @@ function silverstone_select2_shortcode() {
 }
 add_shortcode('silverstone_vehicles_brand', 'silverstone_select2_shortcode');
 
+/**
+ * Fetch vehicle brands from the API
+ * @return string
+ */
 add_action('wp_ajax_get_vehicle_models', 'get_vehicle_models_callback');
 add_action('wp_ajax_nopriv_get_vehicle_models', 'get_vehicle_models_callback');
 function get_vehicle_models_callback() {
@@ -485,7 +523,10 @@ function get_vehicle_models_callback() {
     wp_die();
 }
 
-
+/**
+ * Fetch vehicle years from the API
+ * @return string
+ */
 add_action('wp_ajax_get_vehicle_years', 'get_vehicle_years_callback');
 add_action('wp_ajax_nopriv_get_vehicle_years', 'get_vehicle_years_callback');
 function get_vehicle_years_callback() {
@@ -505,6 +546,10 @@ function get_vehicle_years_callback() {
     wp_die();
 }
 
+/**
+ * Fetch vehicle modifications from the API
+ * @return string
+ */
 add_action('wp_ajax_get_vehicle_modifications', 'get_vehicle_modifications_callback');
 add_action('wp_ajax_nopriv_get_vehicle_modifications', 'get_vehicle_modifications_callback');
 function get_vehicle_modifications_callback() {
@@ -523,6 +568,13 @@ function get_vehicle_modifications_callback() {
     wp_die();
 }
 
+/**
+ * Fetch vehicle tyres from the API
+ * This function retrieves detailed tyre information for a specific vehicle modification.
+ * It checks if the tyre size matches a product in WooCommerce and returns the details.
+ * 
+ * @return array
+ */
 add_action('wp_ajax_get_vehicle_tyres', 'get_vehicle_tyres_callback');
 add_action('wp_ajax_nopriv_get_vehicle_tyres', 'get_vehicle_tyres_callback');
 function get_vehicle_tyres_callback() {
@@ -616,4 +668,35 @@ function get_vehicle_tyres_callback() {
         echo json_encode(['error' => 'No tyres found for this vehicle!']);
     }
     wp_die();
+}
+
+/**
+ * Register the REST API endpoint for fetching tyres
+ * This endpoint allows clients to retrieve tyre information via a POST request.
+ */
+add_action('rest_api_init', function () {
+    register_rest_route('tyres/v1', '/get', array(
+        'methods' => WP_REST_Server::CREATABLE,
+        'callback' => 'get_tyres',
+        'permission_callback' => '__return_true',
+    ));
+});
+
+
+/**
+ * Return the tyres based on the request
+ * This function is called when the REST API endpoint is hit.
+ * @return WP_REST_Response|WP_Error
+ * @throws WP_Error if the request body is invalid or if there are no tyres found
+ */
+function get_tyres($request) {
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log('Request Body: ' . print_r($request->get_body(), true));
+    }
+
+    $body = json_decode($request->get_body(), true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return new WP_Error('invalid_json', 'Invalid JSON in request body', array('status' => 400));
+    }
 }
